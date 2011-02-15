@@ -1,0 +1,6 @@
+<?php /*
+
+[ExtensionsSettings]
+ActiveExtensions[]=pvrupdatesocial
+
+*/ ?>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<software>
+    <metadata>
+        <name>PVR Update Social</name>
+        <version>@@@VERSION@@@</version>
+        <copyright>Copyright 2010 Philippe VINCENT-ROYOL</copyright>
+        <license>http://www.gnu.org/licenses/gpl-2.0.txt GNU GPLv2</license>
+    </metadata>
+
+    <dependencies>
+        <requires>
+            <extension name="ezjscore" />
+        </requires>
+    </dependencies>
+</software>

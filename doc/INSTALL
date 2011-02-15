@@ -1,0 +1,31 @@
+===========================
+ PVR Update Social INSTALL
+===========================
+2011 Philippe Vincent-Royol
+
+REQUIREMENTS
+============
+
+Currently, the only requirements are :
+
+ * eZ Publish 4.x
+
+ INSTALLATION
+ ============
+
+ 1. Unpack the package under *extension/* directory
+
+ 2. Activate **pvrupdatesocial** throught the backoffice or directly in *settings/override/site.ini.append.php* :
+    ::
+        [ExtensionsSettings]
+        ActiveExtensions[]=pvrupdatesocial
+
+ 3. Regenerate the classes autoload array for extensions :
+    ::
+      $ php bin/php/ezpgenerateautoloads.php -e
+
+ 4. Configure your twitter access in an override of **pvrupdatesocial.ini**
+
+ 5. Clear the cache :
+    ::
+      $ php bin/php/ezcache.php --clear-all
