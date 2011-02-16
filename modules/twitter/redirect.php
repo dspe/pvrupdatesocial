@@ -4,8 +4,8 @@ $http	= eZHTTPTool::instance();
 $ini 	= eZINI::instance( 'pvrupdatestatus.ini' );
 
 $twitteroauth = new TwitterOAuth( 
-						$ini->variable( 'TwitterSettings', ConsumerKey ),
-						$ini->variable( 'TwitterSettings', ConsumerSecret )
+						$ini->variable( 'TwitterSettings', 'ConsumerKey' ),
+						$ini->variable( 'TwitterSettings', 'ConsumerSecret' )
 				);
 
 $requestToken = $twitteroauth->getRequestToken(
@@ -25,3 +25,5 @@ else
 {
 	eZDebug::writeError( 'Error : OH MY GOD !' );
 }
+
+?>
