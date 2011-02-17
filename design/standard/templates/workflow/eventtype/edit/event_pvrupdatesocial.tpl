@@ -11,7 +11,17 @@
 		</div>
 
 		<div class="content-navigation-childlist">
-			<a href="./redirect.php"><img src={"./images/lighter.png"|ezdesign()} alt="Sign in with Twitter"/></a>
+			{if ezini( 'TwitterToken', 'Token', 'twittertoken.ini' )}
+				{def $token 	= ezini( 'TwitterToken', 'Token', 'twittertoken.ini' )
+					 $secret 	= ezini( 'TwitterToken', 'Secret', 'twittertoken.ini' ) 
+				}
+				{def $info = twitterInfo( $token, $secret )}
+				{"Correctly login on account"|i18n('extension/twitter')} : <strong>{$info.screen_name}</strong>
+				
+				{undef $token $secret $info}
+			{else}
+				<a href="./redirect.php"><img src={"./images/lighter.png"|ezdesign()} alt="Sign in with Twitter"/></a>
+			{/if}
 		</div>
 
 		<div class="context-toolbar">
