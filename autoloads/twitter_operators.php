@@ -8,7 +8,7 @@ class twitterOperators
 	function __construct()
 	{
 		$this->Operators = array(
-			'twitterInfo'
+			'twitterInfo', 'ezini_exists'
 		);
 	}
 	
@@ -44,6 +44,14 @@ class twitterOperators
 									'Secret' => array( 'type' => 'string',
 														'required' => true,
 														'default' => false )
+							),
+			'ezini_exists' => array(
+									'IniFile' => array( 'type' => 'string',
+														'required' => true,
+														'default' => false ),
+									'Folder' => array( 'type' => 'string',
+														'required' => false,
+														'default' => 'settings' )
 							)
 		);
 	}
@@ -69,6 +77,14 @@ class twitterOperators
 					$infos = $connection->get( 'account/verify_credentials' );
 															
 					return $operatorValue = (array) $infos;
+				}break;
+				
+			case 'ezini_exists':
+				{
+					$ini_file 	= $namedParameters['IniFile'];
+					$folder 	= $namedParameters['Folder'];
+
+					return $operatorValue = eZINI::exists( $ini_file, $folder );
 				}break;
 		}
 	}

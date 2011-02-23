@@ -13,33 +13,67 @@ class pvrUpdateSocialType extends eZWorkflowEventType
 	{
 		$parameters = $process->attribute( 'parameter_list' );
 		
-		$twitterINI = eZINI::instance( 'pvrupdatestatus.ini' );
-       	$twitterDebugOutput = $twitterINI->variable( 'GeneralSettings', 'DebugOutput' );
+		$twitterINI = eZINI::instance( 'twittertoken.ini' );
+		$ini = eZINI::instance( 'pvrupdatestatus.ini' );
+
+		eZLog::write( "Entering eztwitter workflow" );
+       	$twitterConsumerKey		= $ini->variable( 'TwitterSettings', 'ConsumerKey' );
+       	$twitterConsumerSecret 	= $ini->variable( 'TwitterSettings', 'ConsumerSecret');
+       	$twitterAccessToken 	= $twitterINI->variable( 'TwitterToken', 'Token' );
+       	$twitterAccessSecret 	= $twitterINI->variable( 'TwitterToken', 'Secret' );
  
-       	eZLog::write( "Entering eztwitter workflow" );
-       	$twitterConsumerKey		= $twitterINI->variable( 'TwitterSettings', 'ConsumerKey' );
-       	$twitterConsumerSecret 	= $twitterINI->variable( 'TwitterSettings', 'ConsumerSecret');
-       	$twitterAccessToken 	= $twitterINI->variable( 'TwitterSettings', 'AccessToken' );
-       	$twitterAccessSecret 	= $twitterINI->variable( 'TwitterSettings', 'AccessSecret' );
- 
-       	if( empty( $twitterConsumerKey ) || 
+     /*  	if( empty( $twitterConsumerKey ) || 
         	empty( $twitterConsumerSecret ) || 
            	empty( $twitterAccessToken ) || 
            	empty( $twitterAccessSecret ) ) 
-       	{
-        	if( $twitterDebugOutput == 'enabled' ) 
-            	eZLog::write( "Please configure pvrupdatestatus.ini" );    
-       	}
-       	if( $twitterDebugOutput == 'enabled' )
-           	eZLog::write( "Credentials found in pvrupdatestatus.ini" );
+       	{*/
+	       	eZLog::write( "Credentials found in twittertoken.ini" );
+	       	/* @TODO: test à faire avant envoie */
+			$message = "";
+			
+			$processParams = $process->attribute( 'parameter_list' );
 
-        /*$twitter = new Arc90_Service_Twitter();
-       	$twitter->useOAuth( $twitterConsumerKey, 
-                           $twitterConsumerSecret, 
-                           $twitterAccessToken, 
-                           $twitterAccessSecret );*/
+			$object  = eZContentObject::fetch( $processParams['object_id'] );
+			$message .= $object->attribute( 'name' );
+			
+			$url = $object->attribute( 'main_node' )->attribute( 'url_alias' );
+			eZURI::transformURI( $url, true, 'full' );
+	
+			/* Get url shortener */
+			$googleKey = $ini->variable( 'GoogleURLShortener', 'GoogleKey');
+			$requestData = array(
+            	'longUrl' => $url
+        	);
+			
+			$ch = curl_init( sprintf( 'https://www.googleapis.com/urlshortener/v1/url?key=%s', $googleKey ) );
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+			curl_setopt($ch, CURLOPT_POST, true);
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
+	        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($requestData));
+			
+	        $result = curl_exec($ch);
+        	
+			$shortUrl = json_decode( $result );
+			curl_close($ch);
+			
+			$message .= " " . $shortUrl->id;
+			//$dataMap = $object->attribute( 'data_map' );
+			
+			/* Send Twitter status */
+        	$connection = new TwitterOAuth($twitterConsumerKey, $twitterConsumerSecret, $twitterAccessToken, $twitterAccessSecret );
+			$infos = $connection->get( 'account/verify_credentials' );
+			$reponse = $connection->post( 'statuses/update', array( 'status' => $message ) );
+			if( isset( $reponse->error ) )
+				var_dump( $reponse->error );
+		//die();	
 		
-		return eZWorkflowType::STATUS_ACCEPTED;
+			return eZWorkflowType::STATUS_ACCEPTED;
+       /*	}
+       	else
+       	{
+       		return eZWorkflowType::STATUS_REJECTED;
+       	}*/
 	}
 }
 eZWorkflowEventType::registerEventType( pvrUpdateSocialType::WORKFLOW_TYPE_STRING, 'pvrupdatesocialtype');
