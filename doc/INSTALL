@@ -10,6 +10,11 @@ Currently, the only requirements are :
 
  * eZ Publish 4.x
 
+ IMPORTANT
+ =========
+ DO NOT USE PVRUPDATESOCIAL DATATYPE - NOT WORKING RIGHT NOW
+ 
+ 
  INSTALLATION
  ============
 
@@ -29,3 +34,9 @@ Currently, the only requirements are :
  5. Clear the cache :
     ::
       $ php bin/php/ezcache.php --clear-all
+
+ 6. Connect to twitter apps http://twitter.com/apps/new . Be careful to authorize application to Read & Write !
+ 	You will get a ConsummerKey & a Comsummer secret. Edit pvrupdatestatus.ini and add theses keys.
+ 	
+ 7. Connect to google key api in order to obtain api key: https://code.google.com/apis/console
+ 	Add key into pvrupdatestatus.ini file.
