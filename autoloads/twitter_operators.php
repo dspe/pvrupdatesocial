@@ -75,7 +75,7 @@ class twitterOperators
 					
 					$connection = new TwitterOAuth($consumer_key, $consumer_secret, $oauth_token, $oauth_token_secret );
 					$infos = $connection->get( 'account/verify_credentials' );
-															
+								
 					return $operatorValue = (array) $infos;
 				}break;
 				

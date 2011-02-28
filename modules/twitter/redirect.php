@@ -3,6 +3,7 @@
 $http	= eZHTTPTool::instance();
 $ini 	= eZINI::instance( 'pvrupdatestatus.ini' );
 
+var_dump( $ini);
 $twitteroauth = new TwitterOAuth( 
 						$ini->variable( 'TwitterSettings', 'ConsumerKey' ),
 						$ini->variable( 'TwitterSettings', 'ConsumerSecret' )
