@@ -14,7 +14,7 @@ Currently, the only requirements are :
  =========
  DO NOT USE PVRUPDATESOCIAL DATATYPE - NOT WORKING RIGHT NOW
  
- 
+
  INSTALLATION
  ============
 
@@ -24,6 +24,16 @@ Currently, the only requirements are :
     ::
         [ExtensionsSettings]
         ActiveExtensions[]=pvrupdatesocial
+        
+ 3. Create databases:
+ 		CREATE TABLE `ezpublish`.`pvrupdatesocial` (
+		 	`network` VARCHAR( 50 ) NOT NULL ,
+			`consummerKey` VARCHAR( 125 ) NOT NULL ,
+			`consummerSecret` VARCHAR( 125 ) NOT NULL ,
+			`token` VARCHAR( 125 ) NOT NULL ,
+			`secret` VARCHAR( 123 ) NOT NULL,
+			PRIMARY KEY (consummerKey, consummerSecret)
+		) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
 
  3. Regenerate the classes autoload array for extensions :
     ::
