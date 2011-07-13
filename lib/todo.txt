@@ -1,0 +1,39 @@
+<?php
+// In a real application this would use a database, and not a session!
+session_start();
+
+require_once '../../src/apiClient.php';
+require_once '../../src/contrib/apiBuzzService.php';
+
+// Visit https://code.google.com/apis/console to
+// generate your oauth2_client_id, oauth2_client_secret, and to
+// register your oauth2_redirect_uri.
+global $apiConfig;
+$apiConfig['oauth2_client_id'] = 'YOUR CLIENT ID HERE';
+$apiConfig['oauth2_client_secret'] = 'YOUR CLIENT SECRET HERE';
+
+// The oauth2_redirect_uri is typically the path to where you host this PHP file.
+$apiConfig['oauth2_redirect_uri'] = 'http://example.com/path/to/myapp.php';
+$apiConfig['authClass'] = 'apiOAuth2';
+
+$client = new apiClient();
+$buzz = new apiBuzzService($client);
+
+if (isset($_SESSION['access_token'])) {
+  $client->setAccessToken($_SESSION['access_token']);
+} else {
+  $client->setAccessToken($client->authenticate());
+}
+$_SESSION['access_token'] = $client->getAccessToken();
+
+if (isset($_GET['code'])) {
+  header('Location: http://' . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF']);
+}
+
+// Make an authenticated request to the Buzz API.
+if ($client->getAccessToken()) {
+  $me = $buzz->getPeople('@me');
+  $ident = '<img src="%s"> <a href="%s">%s</a>';
+  printf($ident, $me['thumbnailUrl'], $me['profileUrl'], $me['displayName']);
+}
+?>
