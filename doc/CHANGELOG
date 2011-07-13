@@ -1,6 +1,10 @@
 pvrUpdateSocial
 2010-2011 Philippe Vincent-Royol
 
+0.2 alpha
+---------
+Migrate token on db
+
 0.1 alpha
 ------------------
 Initial alpha release

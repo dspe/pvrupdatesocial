@@ -9,41 +9,94 @@ class pvrUpdateSocialType extends eZWorkflowEventType
 		parent::__construct( pvrUpdateSocialType::WORKFLOW_TYPE_STRING, 'Update Social Status');
 	}
 	
+	/*
+	 * @TODO: change test fonction... Not really great as i wish.
+	 * 		  and export some code to a class...
+	 */
 	public function execute( $process, $event )
 	{
+		
 		// Test if ini files exists
-		if( eZINI::exists( 'pvrupdatestatus.ini', 'extension/pvrupdatesocial/settings' ) && eZINI::exists( 'twittertoken.ini', 'settings/override' ) )
+		if( eZINI::exists( 'pvrupdatestatus.ini', 'extension/pvrupdatesocial/settings' ) )
 		{
-			$parameters = $process->attribute( 'parameter_list' );
-
-			// Get param from object : name & url_alias
-			$message = "";
+			$ini 			= eZINI::instance( 'pvrupdatestatus.ini' );
+			$parameters 	= $process->attribute( 'parameter_list' );
 			$processParams 	= $process->attribute( 'parameter_list' );
 			$object  		= eZContentObject::fetch( $processParams['object_id'] );
+			
+			$currentSiteAccess = eZSiteAccess::current();
+			$uriAccess  = ( $currentSiteAccess['type'] == eZSiteAccess::TYPE_URI );
+            $hostAccess = ( $currentSiteAccess['type'] == eZSiteAccess::TYPE_HTTP_HOST );
+            
+            $alterUrl 	= ( "pheelit" == -1 or "pheelit" == $currentSiteAccess['name'] ) ? false : true;
+            
+            if( $alterUrl and $uriAccess )
+            {
+            	// store access path
+            	$previousAccessPath = eZSys::instance()->AccessPath;
+            	// clear access path
+            	eZSys::clearAccessPath();
+            	// set new access path with siteaccess name
+            	eZSys::addAccessPath( "pheelit" );
+            }
+            
+            $node = $object->attribute('main_node');
+			eZSiteAccess::load( 
+						array( 'name' 	  => "pheelit",
+							   'type' 	  => eZSiteAccess::TYPE_STATIC,
+							   'uri_part' => array() 
+						));
+			$url = $node->attribute('url_alias');
+			eZSiteAccess::load( $currentSiteAccess );
+			eZURI::transformURI( $url, false, 'full' );
+					
+			// Get param from object : name & url_alias
+			$message 		= "";
 			$message 	   .= $object->attribute( 'name' );
-			$url 			= $object->attribute( 'main_node' )->attribute( 'url_alias' );
-			eZURI::transformURI( $url, true, 'full' );
+			//$url 			= $node->attribute( 'url_alias' );
+			
+			if( $alterUrl and $hostAccess )
+			{
+				// retrieve domain name associated to the request siteaccess
+				$Ini = eZINI::instance();
+                $matchMapItems = $Ini->variableArray( 'SiteAccessSettings', 'HostMatchMapItems' );
+                foreach ( $matchMapItems as $matchMapItem )
+                {
+                    if ( $matchMapItem[1] == "pheelit" )
+                    {
+                        $host = $matchMapItem[0];
+                        break;
+                    }
+                }
+                if ( isset( $host ) )
+                {
+                    $uriParts = explode( eZSys::hostname(), $url );
+                    $url = implode( $host, $uriParts );
+                }
+			}
 			
 			if( !empty( $message ) && !empty( $url ) )
 			{
-				$twitterINI = eZINI::instance( 'twittertoken.ini' );
-				$ini 		= eZINI::instance( 'pvrupdatestatus.ini' );
-
-				eZLog::write( "Entering eztwitter workflow" );
-       			$twitterConsumerKey		= $ini->variable( 'TwitterSettings', 'ConsumerKey' );
-       			$twitterConsumerSecret 	= $ini->variable( 'TwitterSettings', 'ConsumerSecret');
-       			$twitterAccessToken 	= $twitterINI->variable( 'TwitterToken', 'Token' );
-       			$twitterAccessSecret 	= $twitterINI->variable( 'TwitterToken', 'Secret' );
-       			
+				eZLog::write( "Enterring twitter workflow" );
+				
+				$cond = array( 'network' => 'twitter' );
+				$object = eZPersistentObject::fetchObject( UpdateSocialObject::definition(), null, $cond );
+				
+				$twitterConsumerKey 	= $object->consummerKey;
+				$twitterConsumerSecret 	= $object->consummerSecret;
+				$twitterAccessToken		= $object->token;
+				$twitterAccessSecret 	= $object->secret;
+				
        			if( !empty( $twitterConsumerKey ) && !empty( $twitterConsumerSecret ) && !empty( $twitterAccessToken ) && !empty( $twitterAccessSecret ) )
        			{
-       				
+       				       				
 					/* Get url shortener */
 					$googleKey = $ini->variable( 'GoogleURLShortener', 'GoogleKey');
 					$requestData = array(
 	            		'longUrl' => $url
 	        		);
 				
+	        		/* Fetch short uri */
 					$ch = curl_init( sprintf( 'https://www.googleapis.com/urlshortener/v1/url?key=%s', $googleKey ) );
 					curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 					curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -53,6 +106,7 @@ class pvrUpdateSocialType extends eZWorkflowEventType
 				
 		        	$result = curl_exec($ch);
 		        	
+					
 		        	if( $result == FALSE )
 		        	{
 		        		eZLog::write( "Something wrong when getting shortener url :/ " );
@@ -69,14 +123,16 @@ class pvrUpdateSocialType extends eZWorkflowEventType
 						}
 					
 						$message .= " " . $shortUrl->id;
-					
+					/*	
+						print "<pre>";
+					var_dump( $message );
+					print "</pre>";
+					die();
+					*/
 						/* Send Twitter status */
         				$connection = new TwitterOAuth($twitterConsumerKey, $twitterConsumerSecret, $twitterAccessToken, $twitterAccessSecret );
 						$infos = $connection->get( 'account/verify_credentials' );
 						$reponse = $connection->post( 'statuses/update', array( 'status' => $message ) );
-						
-					var_dump( $reponse );
-					die();
 					
 						if( empty( $reponse->error ) )
 						{

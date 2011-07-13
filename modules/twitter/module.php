@@ -10,8 +10,8 @@ $ViewList['redirect'] = array(
     );
 
 $ViewList['callback'] = array(
-	'script' => 'callback.php',
-	'default_navigation_part' => 'pvrupdatesocial'
-	);
-	
+    'script' => 'callback.php',
+    'default_navigation_part' => 'pvrupdatesocial'
+    );
+
 ?>

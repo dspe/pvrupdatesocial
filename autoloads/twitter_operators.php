@@ -8,7 +8,7 @@ class twitterOperators
     function __construct()
     {
         $this->Operators = array(
-            'twitterInfo', 'ezini_exists'
+            'twitterInfo', 'ezini_exists', 'social_connect'
         );
     }
 
@@ -37,22 +37,27 @@ class twitterOperators
     function namedParameterList()
     {
         return array(
-            'twitterInfo' => array( 
-                                    'Token' => array( 'type' => 'string',
-                                                        'required' => true,
-                                                        'default' => false ),
-                                    'Secret' => array( 'type' => 'string',
-                                                        'required' => true,
-                                                        'default' => false )
-                            ),
+            'twitterInfo' => array(
+                'Token' => array( 'type' => 'string',
+                            'required' => true,
+                            'default' => false ),
+                'Secret' => array( 'type' => 'string',
+                            'required' => true,
+                            'default' => false )
+                        ),
             'ezini_exists' => array(
-                                    'IniFile' => array( 'type' => 'string',
-                                                        'required' => true,
-                                                        'default' => false ),
-                                    'Folder' => array( 'type' => 'string',
-                                                        'required' => false,
-                                                        'default' => 'settings' )
-                            )
+                'IniFile' => array( 'type' => 'string',
+                                'required' => true,
+                                'default' => false ),
+                'Folder' => array( 'type' => 'string',
+                                'required' => false,
+                                'default' => 'settings' )
+            ),
+            'social_connect' => array(
+                'network' => array( 'type' => 'string',
+                                    'required' => true,
+                                    'default' => false )
+                ),
         );
     }
 
@@ -86,6 +91,14 @@ class twitterOperators
 
                     return $operatorValue = eZINI::exists( $ini_file, $folder );
                 }break;
+                
+            case 'social_connect':
+            {
+                include_once( './extension/pvrupdatesocial/classes/updatesocialobject.php' );
+                $cond = array( 'network' => $namedParameters['network'] );
+                $object = eZPersistentObject::fetchObject( UpdateSocialObject::definition(), null, $cond );
+                return $operatorValue = $object;
+            }break;
         }
     }
 

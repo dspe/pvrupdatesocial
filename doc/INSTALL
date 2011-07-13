@@ -9,10 +9,6 @@ REQUIREMENTS
 Currently, the only requirements are :
 
  * eZ Publish 4.x
-
- IMPORTANT
- =========
- DO NOT USE PVRUPDATESOCIAL DATATYPE - NOT WORKING RIGHT NOW
  
 
  INSTALLATION
@@ -50,3 +46,5 @@ Currently, the only requirements are :
  	
  7. Connect to google key api in order to obtain api key: https://code.google.com/apis/console
  	Add key into pvrupdatestatus.ini file.
+ 	
+ 8. Create a workflow event multiplexer workflow. And an updateSocial's workflow. 
