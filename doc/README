@@ -1,17 +1,4 @@
-=================================
- PVR Update Social Documentation
-=================================
+License: See, LICENSE.txt 
+Installation: See, INSTALL.txt
 
--------------------------------------------------
- Version 0.1 alpha - 2011 Philippe Vincent-Royol
--------------------------------------------------
-
-INTRODUCTION
-============
-
-USAGE
-=====
-
-CONFIGURATION & DEVELOPMENT
-===========================
-
+pvrupdatesocial is an extension for eZ Publish, providing functionality to publish your content on social network.
