@@ -94,7 +94,7 @@ class pvrUpdateSocialType extends eZWorkflowEventType
                     //$ch = curl_init( sprintf( 'https://www.googleapis.com/urlshortener/v1/url?key=%s', $googleKey ) );
 
                     $service = urlShortener::create( 'google' );
-                    $uri = $service->shrink( 'http://www.perdu.com' );
+                    $uri = $service->shrink( $url );
 
                     if( $uri == null )
                     {
@@ -121,7 +121,7 @@ class pvrUpdateSocialType extends eZWorkflowEventType
 
                         if( empty( $reponse->error ) )
                         {
-                            eZLog::write( "Can't publish on twitter ?! " . $reponse->error );
+                            eZLog::write( "Can't publish on twitter ?! " . $uri );
                             return eZWorkflowType::STATUS_REJECTED;
                         }
                         else
@@ -129,7 +129,6 @@ class pvrUpdateSocialType extends eZWorkflowEventType
                             return eZWorkflowType::STATUS_ACCEPTED;
                         }
                     }
-                    curl_close($ch);
                 }
                 else
                 {
