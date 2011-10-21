@@ -23,6 +23,7 @@ class pvrUpdateSocialType extends eZWorkflowEventType
             $processParams  = $process->attribute( 'parameter_list' );
             $object         = eZContentObject::fetch( $processParams['object_id'] );
 
+
             $currentSiteAccess = eZSiteAccess::current();
             $uriAccess  = ( $currentSiteAccess['type'] == eZSiteAccess::TYPE_URI );
             $hostAccess = ( $currentSiteAccess['type'] == eZSiteAccess::TYPE_HTTP_HOST );
@@ -40,7 +41,7 @@ class pvrUpdateSocialType extends eZWorkflowEventType
             }
 
             $node = $object->attribute('main_node');
-            eZSiteAccess::load( 
+            eZSiteAccess::load(
                         array( 'name'     => "pheelit",
                                'type'     => eZSiteAccess::TYPE_STATIC,
                                'uri_part' => array() 
@@ -93,7 +94,7 @@ class pvrUpdateSocialType extends eZWorkflowEventType
                     //$googleKey = $ini->variable( 'GoogleURLShortener', 'GoogleKey');
                     //$ch = curl_init( sprintf( 'https://www.googleapis.com/urlshortener/v1/url?key=%s', $googleKey ) );
 
-                    $service = urlShortener::create( 'google' );
+                    $service = urlShortener::create( $ini->variable( 'TwitterSettings', 'UseService' ) );
                     $uri = $service->shrink( $url );
 
                     if( $uri == null )
