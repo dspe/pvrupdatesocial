@@ -119,13 +119,14 @@ class pvrUpdateSocialType extends eZWorkflowEventType
                         $infos = $connection->get( 'account/verify_credentials' );
                         $reponse = $connection->post( 'statuses/update', array( 'status' => $message ) );
 
-                        if( empty( $reponse->error ) )
+                        if( isset( $reponse->error ) )
                         {
-                            eZLog::write( "Can't publish on twitter ?! " . $uri );
+                            eZLog::write( "Can't publish on twitter ?! " . $reponse->error );
                             return eZWorkflowType::STATUS_REJECTED;
                         }
                         else
                         {
+                            eZLog::write( "Publication on twitter is ok :)" );
                             return eZWorkflowType::STATUS_ACCEPTED;
                         }
                     }
