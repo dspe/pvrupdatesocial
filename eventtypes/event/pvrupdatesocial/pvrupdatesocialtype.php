@@ -23,60 +23,13 @@ class pvrUpdateSocialType extends eZWorkflowEventType
             $processParams  = $process->attribute( 'parameter_list' );
             $object         = eZContentObject::fetch( $processParams['object_id'] );
 
+            $arrayInfo = self::getFrontSiteaccess( $object, "pheelit" );
 
-            $currentSiteAccess = eZSiteAccess::current();
-            $uriAccess  = ( $currentSiteAccess['type'] == eZSiteAccess::TYPE_URI );
-            $hostAccess = ( $currentSiteAccess['type'] == eZSiteAccess::TYPE_HTTP_HOST );
-
-            $alterUrl   = ( "pheelit" == -1 or "pheelit" == $currentSiteAccess['name'] ) ? false : true;
-
-            if( $alterUrl and $uriAccess )
+            if( !empty( $arrayInfo["message"] ) && !empty( $arrayInfo["url"] ) )
             {
-                // store access path
-                $previousAccessPath = eZSys::instance()->AccessPath;
-                // clear access path
-                eZSys::clearAccessPath();
-                // set new access path with siteaccess name
-                eZSys::addAccessPath( "pheelit" );
-            }
+                $message = $arrayInfo["message"];
+                $url = $arrayInfo["url"];
 
-            $node = $object->attribute('main_node');
-            eZSiteAccess::load(
-                        array( 'name'     => "pheelit",
-                               'type'     => eZSiteAccess::TYPE_STATIC,
-                               'uri_part' => array() 
-                        ));
-            $url = $node->attribute('url_alias');
-            eZSiteAccess::load( $currentSiteAccess );
-            eZURI::transformURI( $url, false, 'full' );
-
-            // Get param from object : name & url_alias
-            $message        = "";
-            $message       .= $object->attribute( 'name' );
-            //$url          = $node->attribute( 'url_alias' );
-
-            if( $alterUrl and $hostAccess )
-            {
-                // retrieve domain name associated to the request siteaccess
-                $Ini = eZINI::instance();
-                $matchMapItems = $Ini->variableArray( 'SiteAccessSettings', 'HostMatchMapItems' );
-                foreach ( $matchMapItems as $matchMapItem )
-                {
-                    if ( $matchMapItem[1] == "pheelit" )
-                    {
-                        $host = $matchMapItem[0];
-                        break;
-                    }
-                }
-                if ( isset( $host ) )
-                {
-                    $uriParts = explode( eZSys::hostname(), $url );
-                    $url = implode( $host, $uriParts );
-                }
-            }
-
-            if( !empty( $message ) && !empty( $url ) )
-            {
                 eZLog::write( "Enterring twitter workflow" );
 
                 $cond = array( 'network' => 'twitter' );
@@ -151,6 +104,61 @@ class pvrUpdateSocialType extends eZWorkflowEventType
         }
 
     }
+
+     public function getFrontSiteaccess( $object, $siteAccessName )
+     {
+         $currentSiteAccess = eZSiteAccess::current();
+         $uriAccess  = ( $currentSiteAccess['type'] == eZSiteAccess::TYPE_URI );
+         $hostAccess = ( $currentSiteAccess['type'] == eZSiteAccess::TYPE_HTTP_HOST );
+
+         $alterUrl   = ( $siteAccessName == -1 or $siteAccessName == $currentSiteAccess['name'] ) ? false : true;
+
+         if( $alterUrl and $uriAccess )
+         {
+             // store access path
+             $previousAccessPath = eZSys::instance()->AccessPath;
+             // clear access path
+             eZSys::clearAccessPath();
+             // set new access path with siteaccess name
+             eZSys::addAccessPath( $siteAccessName );
+         }
+
+         $node = $object->attribute('main_node');
+         eZSiteAccess::load(
+             array( 'name'     => $siteAccessName,
+                    'type'     => eZSiteAccess::TYPE_STATIC,
+                    'uri_part' => array()
+            ));
+         $url = $node->attribute('url_alias');
+         eZSiteAccess::load( $currentSiteAccess );
+         eZURI::transformURI( $url, false, 'full' );
+
+         // Get param from object : name & url_alias
+         $message        = "";
+         $message       .= $object->attribute( 'name' );
+         //$url          = $node->attribute( 'url_alias' );
+
+         if( $alterUrl and $hostAccess )
+         {
+             // retrieve domain name associated to the request siteaccess
+             $Ini = eZINI::instance();
+             $matchMapItems = $Ini->variableArray( 'SiteAccessSettings', 'HostMatchMapItems' );
+             foreach ( $matchMapItems as $matchMapItem )
+             {
+                 if ( $matchMapItem[1] == $siteAccessName )
+                 {
+                     $host = $matchMapItem[0];
+                     break;
+                 }
+             }
+             if ( isset( $host ) )
+             {
+                 $uriParts = explode( eZSys::hostname(), $url );
+                 $url = implode( $host, $uriParts );
+             }
+         }
+        return array( "message" => $message, "url" => $url);
+     }
 }
 eZWorkflowEventType::registerEventType( pvrUpdateSocialType::WORKFLOW_TYPE_STRING, 'pvrupdatesocialtype');
 
