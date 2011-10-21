@@ -50,6 +50,8 @@ class pvrShortenerHandlerGoogle extends urlShortener
                 return $json->id;
             }
 
+            curl_close( $ch );
+
          }
          return null;
      }
